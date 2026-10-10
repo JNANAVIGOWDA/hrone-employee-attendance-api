@@ -1,36 +1,144 @@
 # Employee Attendance & Analytics API
 
-FastAPI service for employee attendance, manual corrections with audit history, and MongoDB-backed analytics. The API
-contract and business rules are in `openapi.yaml`; MongoDB document shapes are in `DATA_MODEL.md`.
+A REST API built with **Python, FastAPI, and MongoDB** to manage employee attendance, record punch-in and punch-out events, support manual attendance corrections with an audit trail, and provide attendance analytics.
 
-## Run locally
+## Tech Stack
+
+* Python 3.11+
+* FastAPI
+* MongoDB 6+
+* PyMongo
+* Pytest
+
+## Features
+
+* Employee management and employee listing.
+* Employee attendance punch-in and punch-out.
+* Attendance business-rule validation.
+* Manual attendance corrections with audit history.
+* Attendance analytics powered by MongoDB aggregation pipelines.
+* Query explain endpoints for inspecting database query execution plans.
+* API documentation through Swagger UI.
+* Automated tests for API contracts, business rules, analytics, and concurrent requests.
+
+## Project Structure
+
+```text
+hrone-employee-attendance-api/
+├── app/                  # FastAPI application
+├── tests/                # Automated tests
+├── .gitignore
+├── DATA_MODEL.md         # MongoDB document structures
+├── DECISIONS.md          # Technical decisions and trade-offs
+├── REVIEW.md             # Starter-code review
+├── openapi.yaml          # API specification
+├── requirements.txt      # Python dependencies
+├── sample_seed.py        # Optional sample-data seeding script
+└── README.md
+```
+
+## Prerequisites
+
+Install the following before running the application:
+
+* Python 3.11 or newer
+* MongoDB 6 or newer
+* Git
+
+## Installation and Setup
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/JNANAVIGOWDA/hrone-employee-attendance-api.git
+cd hrone-employee-attendance-api
+```
+
+### 2. Create and activate a virtual environment
+
+On Windows PowerShell:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-$env:MONGO_URI = "mongodb://localhost:27017"
-$env:MONGO_DB = "attendance_db"
-uvicorn app.main:app --port 8000 --reload
 ```
 
-The application creates its indexes at startup. Set `MONGO_URI` and `MONGO_DB` in the environment for your own MongoDB
-instance; environment variables take precedence over values loaded from a local `.env`. Do not commit `.env` files,
-credentials, the virtual environment, or the supplied `sample_data/` JSON records. The optional `sample_seed.py` script
-can load those records when the candidate-kit files are available locally; the data folder is ignored by Git.
+### 3. Install dependencies
 
-## Tests
+```bash
+python -m pip install -r requirements.txt
+```
 
-The endpoint test fixtures clear the `employees` and `attendance_logs` collections in the configured database. Point
-`MONGO_DB` at a disposable test database before running them:
+### 4. Configure MongoDB
+
+Ensure your MongoDB server is running.
+
+Set the MongoDB connection and database name in PowerShell:
+
+```powershell
+$env:MONGO_URI = "mongodb://127.0.0.1:27017"
+$env:MONGO_DB = "attendance_db"
+```
+
+Use your own MongoDB connection URI if you are connecting to a different instance.
+
+### 5. Start the API
+
+```bash
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+The API will be available at:
+
+* **API base URL:** `http://127.0.0.1:8000`
+* **Swagger UI:** `http://127.0.0.1:8000/docs`
+* **OpenAPI JSON:** `http://127.0.0.1:8000/openapi.json`
+
+Use the Swagger UI to explore endpoints and send requests interactively.
+
+## Running Tests
+
+Run the test suite using:
+
+```bash
+python -m pytest tests/ -q
+```
+
+**Important:** Run tests only against a disposable test database because test fixtures may clear the `employees` and `attendance_logs` collections.
+
+For example, in PowerShell:
 
 ```powershell
 $env:MONGO_DB = "attendance_takehome_test"
 python -m pytest tests/ -q
 ```
 
-The suite covers contract and response schemas, business-rule edge cases, and concurrent HTTP requests using local
-MongoDB data. Its fixtures use the candidate kit's `sample_data/` files, which are intentionally not included in the
-submission. All five explain plans were also checked with a generated 100,000-record dataset, including the
-unfiltered department summary: each included `IXSCAN` and none included `COLLSCAN`. This representative local check is
-not a guarantee about every production workload or the evaluator's hidden dataset.
+Ensure the required test data and MongoDB instance are available before running the suite.
+
+The test suite was run locally, with **72 tests passing**.
+
+## Query Performance Validation
+
+The five query explain plans were checked locally using a generated dataset containing 100,000 records. Each checked plan included an `IXSCAN`, and none included a `COLLSCAN`.
+
+These results reflect the tested local dataset and queries. Actual query performance may vary with different data distributions and workloads.
+
+## Documentation
+
+* `openapi.yaml` — API contract and endpoint specifications.
+* `DATA_MODEL.md` — MongoDB document structures.
+* `DECISIONS.md` — Technical decisions and trade-offs.
+* `REVIEW.md` — Review of the supplied starter code.
+
+## Security and Configuration
+
+* Configure MongoDB connection details through environment variables.
+* Do not commit credentials, secrets, `.env` files, or virtual-environment directories.
+* Do not commit the supplied sample-data JSON records.
+* Use a separate, disposable database for automated tests.
+
+## Author
+
+**Jnanavi N N**
+
+GitHub: https://github.com/JNANAVIGOWDA
